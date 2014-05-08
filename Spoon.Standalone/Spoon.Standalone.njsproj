@@ -39,7 +39,6 @@
     <Compile Include="src\scraper.js" />
     <Compile Include="src\sitemap-reader.js" />
     <Content Include="package.json" />
-    <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
