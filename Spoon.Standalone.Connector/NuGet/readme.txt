@@ -1,7 +1,9 @@
 Spoon Standalone Connector
 -----------------------------------------------------------------------------------------
 
-IMPORTANT:
+IMPORTANT: This connector requires you to have generated page snapshots in an Azure blob
+storage container using Spoon Standalone. Spoon Standalone is available for download at
+https://github.com/LeviBotelho/spoon-standalone.
 
 -----------------------------------------------------------------------------------------
 
