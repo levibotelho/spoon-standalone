@@ -4,38 +4,95 @@ Spoon Standalone is an alternative solution to Spoon, built to work in cases whe
 
 ## How does it work?
 
-Spoon Standalone works in much the same way as Spoon does, crawling your site and creating snapshots of your dynamic content that can be served up to search engines when they request it. However, there are two key differences.
+Spoon Standalone works in much the same way as Spoon does, crawling your site and creating snapshots of your dynamic content that can be served up to search engines and web crawlers when they request it. There are a few key differences between the two projects, however.
 
 + Spoon Standalone is not embedded into a web application like Spoon is. It is launched manually once a given site is up and running.
 + Spoon Standalone stores its snapshots in an Azure blob storage container and not in a directory in your web application's hierarchy.
-+ Spoon Standalone is a Node.js solution. I would be happy to port it to C# if there was a need for such a thing.
++ Spoon Standalone is written in Node.js. That said, because the project is not integrated into your web application you do not actually need to know anything about Node.js in order to use it. The only requirement is that you have Node.js installed on your system so that you can run it.
++ Spoon Standalone will work with any server-side web application architecture. The Spoon Standalone Connector which streamlines the retrieval of snapshots is written for ASP.NET web applications, but is not required to use Spoon Standalone.
 
 ## How do I use it?
 
-To use Spoon Standalone you will need an Azure storage account with a free blob storage container. This container must be reserved exclusively for Spoon, as Spoon will clear its contents before uploading snapshots in order to use as little space as possible.
+### Step 1 - Prepare Node.js
 
-To create your snapshots, download the Spoon Standalone project and fill in the config file located at `/src/config.js` as follows. 
+Node.js is required to run Spoon Standalone. Install it on your system if necessary, then navigate to the directory where you have downloaded Spoon Standalone and run `npm install` to install all necessary dependencies.
 
-	// The name of your storage account
-	exports.azureStorageAccount = '';
-	// The access key of your storage account
-	exports.azureAccessKey = '';
-	// The name of the container to use to store the snapshots
-	exports.azureContainerName = '';
+### Step 2 - Prepare an Azure blob storage container
 
-	// The URL of a text-style sitemap containing the links to crawl.
-	exports.sitemapUrl = '';
+To use Spoon Standalone you will need an Azure storage account with an empty blob storage container. This container must be reserved exclusively for Spoon, as Spoon will clear its contents before uploading any snapshots in order to use as little storage space as possible. When you create the container, be sure to give it **Public Blob** access.
 
-	// An array of URLs to crawl. All URLs must be in hashbang form
-	// (http://www.example.com/#!/about) with the exception of the home
-	// page which does not have to be (http://www.example.com is valid).
-	exports.urls = [];
+### Step 3 - Configure Spoon Standalone
 
-Please note the following.
+Spoon Standalone needs a bit of information in order to crawl your site. Fill in the configuration file located at `/src/config.js` with the following information.
 
-+ Spoon will crawl either a sitemap or the URLs in the URL array, not both. If a sitemap URL is specified, the URL array will be ignored. If you want to use the URL array then simply leave the sitemap URL as an empty string.
-+ At the moment the only type of sitemap that is supported is a text file containing one URL per line. XML-style Sitemaps are not currently supported, but could be in the future if there was need for such a feature.
++ The name of your Azure storage account.
++ The access key of your Azure storage account.
++ The name of the container in which you wish to store your snapshots.
++ The list of pages to crawl.
 
+There are actually two ways of telling Spoon Standalone which pages you want it to crawl. The best way is to provide it with the URL of a simple sitemap. A simple sitemap is a basic text file with one URL per line. Spoon Standalone does not at the moment support XML-style Sitemaps, but could in the future if there was demand for such a feature.
+
+If your site does not have a simple sitemap, you can tell Spoon Standalone which pages to crawl by providing it with an array of URLs. Be aware that if you specify both a sitemap *and* an array of URLs to crawl, Spoon Standalone will only crawl the URLs listed in the sitemap.
+
+### Step 4 - Add snapshot retrieval code to your site
+
+#### ASP.NET MVC
+
+Install the Spoon Standalone Connector from NuGet (`PM> Install-Package Spoon.Standalone.Connector`) and rewrite your main Action method as follows.
+
+	public async Task<ActionResult> Index(string _escaped_fragment_)
+    {
+        if (_escaped_fragment_ == null)
+            return View();
+
+        // NOTE: Failure to respond correctly to _escaped_fragment_ requests could result in your entire site
+        // not being indexed. You should at the very least log all errors before handling them appropriately.
+        try
+        {
+            // TODO: Fill in your Azure storage account and storage container names.
+            return await SnapshotManager.GetSnapshotAsync(_escaped_fragment_, "", "");
+        }
+        catch (ArgumentNullException)
+        {
+            // The _escaped_fragment_ is null. You must verify that it is not null before calling GetSnapshotAsync.
+            throw;
+        }
+        catch (ArgumentException)
+        {
+            // The Azure storage account name or storage container name is null or whitespace.
+            throw;
+        }
+        catch (HttpRequestException)
+        {
+            // The _escaped_fragment_ does not correspond to a snapshot generated by Spoon Standalone.
+            throw;
+        }
+        catch
+        {
+            // If you end up here please create an issue at https://github.com/LeviBotelho/spoon-standalone/issues.
+            throw;
+        }
+    }
+
+#### Other platforms
+
+You will need to add code to your application to return an Azure blob as an HTML document whenever an `_escaped_fragment_` is passed as a GET parameter in a request to your site. The code to do this is very simple, as Azure blobs are accessible directly via a URL. No Azure storage API is required. The URLs that Spoon uses to store snapshots are constructed as follows.
+
+	http://[Storae Account].blob.core.windows.net/[Container]/_escaped_fragment_=[_escaped_fragment_ value].html
+
+Note that `[_escaped_fragment_ value]` will be empty when the snapshot refers to the application's home page.
+
+### Step 5 - Publish your site
+
+Your site must be up and running in order for Spoon to crawl it and generate snapshots.
+
+### Step 6 - Run Spoon Standalone
+
+Run Spoon Standalone by executing `node run.js` from Spoon's root directory.
+
+### Step 7 - Test it out
+
+Test that everything is working by making a sample request to your site with an `_escaped_fragment_` using Fiddler or a similar tool. Dynamic content should be correctly rendered.
 
 ## Problems? Don't like what you see?
 I wrote this project out of personal necessity but would be happy to adapt it for use by a wider audience if the need arises. Please feel free to make feature requests or bug reports in the issue tracker.
