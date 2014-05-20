@@ -29,6 +29,9 @@ namespace Spoon.Standalone.Connector
             if (string.IsNullOrWhiteSpace(azureStorageContainer))
                 throw new ArgumentException("azureStorageContainer");
 
+            if (escapedFragment == "/")
+                escapedFragment = "";
+
             var blobUrl = GetSnapshotUrl(escapedFragment, azureStorageAccount, azureStorageContainer);
             using (var client = new HttpClient())
             {

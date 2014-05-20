@@ -3,7 +3,7 @@
   <metadata>
     <id>Spoon.Standalone.Connector</id>
     <title>Spoon Standalone Connector</title>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <authors>Levi Botelho</authors>
     <owners>Levi Botelho</owners>
     <licenseUrl>https://github.com/LeviBotelho/spoon-standalone/blob/master/LICENSE</licenseUrl>
@@ -11,7 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Spoon Standalone Connector streamlines the retrieval of page snapshots generated with Spoon Standalone.</description>
     <summary>Connector for ASP.NET apps using Spoon Standalone for SEO.</summary>
-    <releaseNotes>Updated readme.</releaseNotes>
+    <releaseNotes>Fixed "/" path bug.</releaseNotes>
     <copyright>Copyright © Levi Botelho 2014</copyright>
     <tags>SEO ASP.NET SPA AngularJS Single Page App Google Search Engine Optimization Escaped Fragment Standalone Azure Web Sites</tags>
   </metadata>
