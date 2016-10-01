@@ -1,5 +1,11 @@
 # Spoon.Standalone
 
+## Deprecation notice
+
+Google now supports crawling of web applications that use JavaScript to present their content, and has [deprecated](https://webmasters.googleblog.com/2015/10/deprecating-our-ajax-crawling-scheme.html) the escaped fragment Ajax crawling scheme that Spoon was designed to take advantage of. As such, this library is no longer needed, and no longer maintained.
+
+## Overview
+
 Spoon Standalone is an alternative solution to Spoon, built to work in cases where it is not possible to launch a separate process to crawl your site. Azure Web Sites are a good example of this.
 
 ## How does it work?
